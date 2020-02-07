@@ -56,7 +56,31 @@ public class Hybride {
 
         try {
             for (byte[] clef : clefs) {
-
+                try {
+                    chiffreur = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                }
+                catch (Exception e) { System.out.println("AES n'est pas disponible.");}
+                decrypteFichier(clef, ivspec, cis, fos, fis);
+                try {
+                    chiffreur = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                }
+                catch (Exception e) { System.out.println("AES n'est pas disponible.");}
+                decrypteFichier(clef, ivspec, cis, fos, fis);
+                try {
+                    chiffreur = Cipher.getInstance("AES/CFB/PKCS5Padding");
+                }
+                catch (Exception e) { System.out.println("AES n'est pas disponible.");}
+                decrypteFichier(clef, ivspec, cis, fos, fis);
+                try {
+                    chiffreur = Cipher.getInstance("AES/OFB/PKCS5Padding");
+                }
+                catch (Exception e) { System.out.println("AES n'est pas disponible.");}
+                decrypteFichier(clef, ivspec, cis, fos, fis);
+                try {
+                    chiffreur = Cipher.getInstance("AES/CTR/PKCS5Padding");
+                }
+                catch (Exception e) { System.out.println("AES n'est pas disponible.");}
+                decrypteFichier(clef, ivspec, cis, fos, fis);
             }
             fos.close();
             cis.close();
@@ -77,6 +101,7 @@ public class Hybride {
             }
         } catch(Exception e){
             e.printStackTrace();
+            System.exit(0);
         }
         System.out.println(cis);
     }

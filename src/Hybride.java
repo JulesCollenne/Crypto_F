@@ -4,13 +4,13 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 public class Hybride {
@@ -19,7 +19,6 @@ public class Hybride {
     private static final String nomDuTrousseau = "Trousseau.p12";
     private static final char[] motDePasse = "Alain Turin".toCharArray();
     private static KeyStore.ProtectionParameter protection;
-    private static String alias;
 
     private static Cipher chiffreur = null;
 
@@ -50,18 +49,22 @@ public class Hybride {
             try {
                 alias = tousLesAliases.nextElement();
                 protection = new KeyStore.PasswordProtection(motDePasse);
-                if(magasin.getEntry(alias, protection) instanceof KeyStore.PrivateKeyEntry)
-                    entréePrivée = (KeyStore.PrivateKeyEntry) magasin.getEntry(alias, protection);
+                try {
+                    if (magasin.getEntry(alias, protection) instanceof KeyStore.PrivateKeyEntry)
+                        entréePrivée = (KeyStore.PrivateKeyEntry) magasin.getEntry(alias, protection);
+                } catch(Exception e){
+
+                }
                 if(entréePrivée != null) {
                     if (magasin.isKeyEntry(alias)) {
-                        System.out.println("La clef est : " + entréePrivée.getPrivateKey());
+                        //System.out.println("La clef est : " + entréePrivée.getPrivateKey());
                         decrypte(entréePrivée, messageChiffré, "RSA/ECB/PKCS1Padding");
                         decrypte(entréePrivée, messageChiffré, "RSA/ECB/OAEPWithSHA-1AndMGF1Padding");
                         decrypte(entréePrivée, messageChiffré, "RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
                     }
                 }
             } catch (java.lang.UnsupportedOperationException e){
-                //e.printStackTrace();
+                e.printStackTrace();
                 //System.exit(-1);
             } catch(Exception e){
                 e.printStackTrace();
@@ -76,10 +79,25 @@ public class Hybride {
             chiffreur = Cipher.getInstance(algo);
             clefPrivée = entréePrivée.getPrivateKey();
             chiffreur.init(Cipher.DECRYPT_MODE, clefPrivée);
-            messageDéchiffré = chiffreur.doFinal(messageChiffré);
-            System.out.println("Message déchiffré: \"" + new String(messageDéchiffré) + "\"");
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
-            e.printStackTrace();
+            try {
+                messageDéchiffré = chiffreur.doFinal(messageChiffré);
+            } catch(Exception e){
+                return;
+            }
+            if(messageDéchiffré.length == 16 || messageDéchiffré.length == 24 || messageDéchiffré.length == 32)
+                System.out.println("Message déchiffré: \"" + toHex(messageDéchiffré) + "\"");
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+            //e.printStackTrace();
+            //System.exit(-1);
         }
     }
+
+    public static String toHex(byte[] données) {
+        StringBuffer sb = new StringBuffer();
+        for(byte k: données) {
+            sb.append(String.format("%02X", k));
+        }
+        return sb.toString();
+    }
+
 }

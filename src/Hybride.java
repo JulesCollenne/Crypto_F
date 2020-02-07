@@ -1,9 +1,11 @@
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.InvalidKeyException;
@@ -26,9 +28,57 @@ public class Hybride {
     public static void main(String[] args){
         ArrayList<byte[]> clefs = trouveClefs();
         for (byte[] clef : clefs) System.out.println(toHex(clef));
+        decrypte(clefs);
+    }
 
+    public static void decrypte(ArrayList<byte[]> clefs){
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+        CipherInputStream cis = null;
+        byte[] iv = new byte[16];
+        try{
+            fis = new FileInputStream("mystere2");
+            fos = new FileOutputStream("mystere_sortie2");
+            fis.read(iv);
+        }
+        catch (Exception e) {
+            System.out.println("Fichier inexistant:"+ e.getMessage());
+            System.exit(0);
+        }
 
+        IvParameterSpec ivspec = new IvParameterSpec(iv);
+        SecretKeySpec clefSecrète;
 
+        try {
+            chiffreur = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        }
+        catch (Exception e) { System.out.println("AES n'est pas disponible.");}
+
+        try {
+            for (byte[] clef : clefs) {
+
+            }
+            fos.close();
+            cis.close();
+            fis.close();
+        } catch (Exception e) { System.out.println("Déchiffrement impossible:"+ e.getMessage());}
+    }
+
+    public static void decrypteFichier(byte[] clef, IvParameterSpec ivspec, CipherInputStream cis, FileOutputStream fos, FileInputStream fis){
+        int nbOctetsLus;
+        byte[] buffer = new byte[1024];
+        SecretKeySpec clefSecrète = new SecretKeySpec(clef, "AES");
+
+        try {
+            chiffreur.init(Cipher.DECRYPT_MODE, clefSecrète, ivspec);
+            cis = new CipherInputStream(fis, chiffreur);
+            while ((nbOctetsLus = cis.read(buffer)) != -1) {
+                fos.write(buffer, 0, nbOctetsLus);
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        System.out.println(cis);
     }
 
     public static ArrayList<byte[]> trouveClefs(){
@@ -69,13 +119,13 @@ public class Hybride {
                     if (magasin.isKeyEntry(alias)) {
                         byte[] tmp;
                         //System.out.println("La clef est : " + entréePrivée.getPrivateKey());
-                        tmp = decrypte(entréePrivée, messageChiffré, "RSA/ECB/PKCS1Padding");
+                        tmp = decrypteClef(entréePrivée, messageChiffré, "RSA/ECB/PKCS1Padding");
                         if(tmp != null)
                             clefsPossibles.add(tmp);
-                        tmp = decrypte(entréePrivée, messageChiffré, "RSA/ECB/OAEPWithSHA-1AndMGF1Padding");
+                        tmp = decrypteClef(entréePrivée, messageChiffré, "RSA/ECB/OAEPWithSHA-1AndMGF1Padding");
                         if(tmp != null)
                             clefsPossibles.add(tmp);
-                        tmp = decrypte(entréePrivée, messageChiffré, "RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+                        tmp = decrypteClef(entréePrivée, messageChiffré, "RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
                         if(tmp != null)
                             clefsPossibles.add(tmp);
                     }
@@ -90,7 +140,7 @@ public class Hybride {
         return clefsPossibles;
     }
 
-    public static byte[] decrypte(KeyStore.PrivateKeyEntry entréePrivée, byte[] messageChiffré, String algo){
+    public static byte[] decrypteClef(KeyStore.PrivateKeyEntry entréePrivée, byte[] messageChiffré, String algo){
         PrivateKey clefPrivée;
         byte[] messageDéchiffré;
         try {

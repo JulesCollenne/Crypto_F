@@ -2,6 +2,7 @@
 
 import java.io.*;
 import java.security.*;
+import java.util.Arrays;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.spec.SecretKeySpec;

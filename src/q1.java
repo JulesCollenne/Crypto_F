@@ -8,10 +8,10 @@ import java.io.FileOutputStream;
 public class q1 {
 
     private static final byte[] clefBrute = { // 16 octets
-            (byte) 0x2b, (byte) 0x7e, (byte) 0x15, (byte) 0x16,
-            (byte) 0x28, (byte) 0xae, (byte) 0xd2, (byte) 0xa6,
-            (byte) 0xab, (byte) 0xf7, (byte) 0x15, (byte) 0x88,
-            (byte) 0x09, (byte) 0xcf, (byte) 0x4f, (byte) 0x3c };
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
     private static Cipher chiffreur;
     private static SecretKeySpec clefSecrète;
 
@@ -22,11 +22,16 @@ public class q1 {
     private static CipherInputStream cis;
 
     public static void main(String[] args){
-        byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        try {
+            chiffreur = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        }
+        catch (Exception e) { System.out.println("AES n'est pas disponible.");}
+        clefSecrète = new SecretKeySpec(clefBrute, "AES");
+        byte[] iv = { (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x01 };
         IvParameterSpec ivspec = new IvParameterSpec(iv);
         try{
-            fis = new FileInputStream(args[1]);
-            fos = new FileOutputStream(args[2]);
+            fis = new FileInputStream("mystere");
+            fos = new FileOutputStream("mystere_decode.jpg");
         }
         catch (Exception e) { System.out.println("Fichier inexistant:"+ e.getMessage());}
         try {

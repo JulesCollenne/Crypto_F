@@ -24,8 +24,8 @@ public class AES {
 
     public static void main(String[] args) {
         try {
-            fis = new FileInputStream(args[0]);
-            fos = new FileOutputStream(args[1]);
+            fis = new FileInputStream("test");
+            fos = new FileOutputStream("test_sortie");
         }
         catch (Exception e) { System.out.println("Fichier inexistant.");}
         System.out.println("Clef utilisée: 0x" + toHex(clefBrute));
@@ -61,8 +61,8 @@ public class AES {
         //  Etape 4.   Déchiffrer en guise de test
         //------------------------------------------------------------------
         try{
-            fis = new FileInputStream(args[1]);
-            fos = new FileOutputStream(args[2]);
+            fis = new FileInputStream("test_sortie");
+            fos = new FileOutputStream("test_sortie2");
         }
         catch (Exception e) { System.out.println("Fichier inexistant:"+ e.getMessage());}
         try {
